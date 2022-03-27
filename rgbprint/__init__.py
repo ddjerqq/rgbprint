@@ -191,9 +191,6 @@ def demo():
     print('\ngradient_change(text, start_color="red", end_color="green")')
     gradient_change(text, start_color="red", end_color="green")
 
-    print('\ngradient_scroll(text, start_color="red", end_color="green", delay=0.05)')
-    gradient_scroll(text, start_color="red", end_color="green", delay=0.05)
-
     print('\ngradient_scroll(text, start_color="red", end_color="green", delay=0.005, times=6)')
     gradient_scroll(text, start_color="red", end_color="green", delay=0.005, times=6)
 
@@ -331,6 +328,7 @@ def rgb_type(
     for char in text:
         sys.stdout.write(char)
         time.sleep(delay)
+        sys.stdout.flush()
 
     sys.stdout.write(end)
     sys.stdout.write(END_CHAR)
@@ -362,6 +360,7 @@ async def async_rgb_type(
     for char in text:
         sys.stdout.write(char)
         await asyncio.sleep(delay)
+        sys.stdout.flush()
 
     sys.stdout.write(end)
     sys.stdout.write(END_CHAR)
@@ -646,6 +645,7 @@ def gradient_type(
     for idx, char in enumerate(text):
         sys.stdout.write(_color_char(gradient[idx]))
         sys.stdout.write(char)
+        sys.stdout.flush()
         time.sleep(delay)
 
     sys.stdout.write(end)
@@ -689,6 +689,7 @@ async def async_gradient_type(
     for idx, char in enumerate(text):
         sys.stdout.write(_color_char(gradient[idx]))
         sys.stdout.write(char)
+        sys.stdout.flush()
         await asyncio.sleep(delay)
 
     sys.stdout.write(end)
