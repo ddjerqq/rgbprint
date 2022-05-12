@@ -22,7 +22,7 @@ async def _demo():
     e_col = "#99FF33"
 
     rgbprint("loading rgbprint demo...", color=s_col)
-    async for _ in load_bar(s_col, e_col, width=100, delay=0.01):
+    async for _ in load_bar_async(s_col, e_col, width=100, delay=0.01):
         pass
 
     gradient_print(LOGO2,

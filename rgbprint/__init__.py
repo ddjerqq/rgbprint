@@ -1,9 +1,23 @@
+"""
+rgbprint \n
+-----------
+print colors and gradients in your terminal!
+-------------------------------------------- \n
+usage: \n
+>>> from rgbprint import * \n
+>>> rgbprint("some", "text", color="red") \n
+>>> gradient_print("some", "text", start_color="red", end_color="blue") \n
+>>> for _ in load_bar("red", "blue", 10): \n
+>>>     ... \n
+"""
+
+
 import os
 
-from .src.fore import *
-from .src.gradient import *
-from .src.rgbprint import rgbprint
-from .src.demo import *
+from .fore import *
+from .gradient import *
+from .load_bar import *
+from .demo import *
 
 
 __all__ = [
@@ -13,12 +27,10 @@ __all__ = [
     "gradient_print",
     "gradient_change",
     "gradient_scroll",
-    "gradient_scroll_async"
+    "gradient_scroll_async",
 ]
 
 __version__ = "3.0.0"
 
-
-# magic initialization of colors :0
 os.system("")
-
+# initialize colors lol
