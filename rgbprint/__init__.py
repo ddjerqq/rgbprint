@@ -9,6 +9,8 @@ usage: \n
 >>> gradient_print("some", "text", start_color="red", end_color="blue") \n
 >>> for _ in load_bar("red", "blue", 10): \n
 >>>     ... \n
+\n
+>>> print(f"{Fore.RED}hello", end=f"{Fore.RESET}\\n")
 """
 
 
@@ -18,6 +20,7 @@ from .fore import *
 from .gradient import *
 from .load_bar import *
 from .demo import *
+from .rgbprint import *
 
 
 __all__ = [
@@ -30,7 +33,7 @@ __all__ = [
     "gradient_scroll_async",
 ]
 
-__version__ = "3.0.0"
+__version__ = "3.0.2"
 
 os.system("")
 # initialize colors lol
