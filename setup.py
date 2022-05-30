@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="rgbprint",
-    version="3.0.2",
+    version="3.0.3",
     license="GNU",
     author="ddjerqq",
     author_email="ddjerqq@gmail.com",

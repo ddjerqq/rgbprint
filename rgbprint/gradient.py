@@ -94,7 +94,7 @@ def gradient_change(
     :param values: any value, will be auto-cast to str
     :param start_color: start color, this can be in any supported format
     :param end_color: end color, keep in mind, you should pass both start and end colors.
-    :param delay: delay between each change, recommeneded to be lower than 0.1
+    :param delay: delay between each change, recommended to be lower than 0.1
     :param sep: separator, gets auto-cast to str
     :param end: end char, gets auto-cast to str
     """
@@ -122,8 +122,8 @@ def gradient_change(
 
 def gradient_scroll(
         *values: Any,
-        start_color: str | int | tuple[int, int, int] | None = None,
-        end_color:   str | int | tuple[int, int, int] | None = None,
+        start_color: Union[str, int, Tuple[int, int, int], Color, SUPPORTED_COLORS_LITERAL],
+        end_color:   Union[str, int, Tuple[int, int, int], Color, SUPPORTED_COLORS_LITERAL],
         delay: float = 0.03,
         times: int = 4,
         reverse: bool = False,
@@ -136,7 +136,7 @@ def gradient_scroll(
     :param values: any value, will be auto-cast to str
     :param start_color: start color, this can be in any supported format
     :param end_color: end color, keep in mind, you should pass both start and end colors.
-    :param delay: delay between each change, recommeneded to be lower than 0.1
+    :param delay: delay between each change, recommended to be lower than 0.1
     :param times: number of times to scroll
     :param reverse: reverse the gradient
     :param sep: separator, gets auto-cast to str
@@ -176,8 +176,8 @@ def gradient_scroll(
 # async
 async def gradient_scroll_async(
         *values: Any,
-        start_color: str | int | tuple[int, int, int] | None = None,
-        end_color:   str | int | tuple[int, int, int] | None = None,
+        start_color: Union[str, int, Tuple[int, int, int], Color, SUPPORTED_COLORS_LITERAL],
+        end_color:   Union[str, int, Tuple[int, int, int], Color, SUPPORTED_COLORS_LITERAL],
         delay: float = 0.03,
         times: int = 4,
         reverse: bool = False,
@@ -190,7 +190,7 @@ async def gradient_scroll_async(
     :param values: any value, will be auto-cast to str
     :param start_color: start color, this can be in any supported format
     :param end_color: end color, keep in mind, you should pass both start and end colors.
-    :param delay: delay between each change, recommeneded to be lower than 0.1
+    :param delay: delay between each change, recommended to be lower than 0.1
     :param times: number of times to scroll
     :param reverse: reverse the gradient
     :param sep: separator, gets auto-cast to str
