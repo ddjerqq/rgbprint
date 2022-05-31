@@ -14,7 +14,6 @@ __all__ = ["load_bar", "load_bar_async"]
 
 async def load_bar_async(start_color: Union[str, int, SUPPORTED_COLORS_LITERAL, Tuple[int, int, int], Color],
                          end_color:   Union[str, int, SUPPORTED_COLORS_LITERAL, Tuple[int, int, int], Color],
-                         /,
                          *,
                          width: int = 20,
                          delay: float = 0.5,
@@ -63,7 +62,6 @@ async def load_bar_async(start_color: Union[str, int, SUPPORTED_COLORS_LITERAL, 
 
 def load_bar(start_color: Union[str, int, SUPPORTED_COLORS_LITERAL, Tuple[int, int, int], Color],
              end_color:   Union[str, int, SUPPORTED_COLORS_LITERAL, Tuple[int, int, int], Color],
-             /,
              *,
              width: int = 20,
              delay: float = 0.5,

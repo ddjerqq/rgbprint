@@ -21,6 +21,8 @@ from .gradient import *
 from .load_bar import *
 from .demo import *
 from .rgbprint import *
+from .load_bar import *
+from .color import *
 
 
 __all__ = [
@@ -31,9 +33,12 @@ __all__ = [
     "gradient_change",
     "gradient_scroll",
     "gradient_scroll_async",
+    "Color",
+    "load_bar",
+    "load_bar_async"
 ]
 
-__version__ = "3.0.2"
+__version__ = "3.0.3"
 
 os.system("")
 # initialize colors lol
