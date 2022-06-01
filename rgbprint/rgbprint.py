@@ -3,7 +3,6 @@ from typing import Any, Union, Tuple
 from .parser import *
 from .fore import Fore
 from .color import Color
-from .supported_colors import SUPPORTED_COLORS_LITERAL
 
 
 __all__ = ["rgbprint"]
@@ -11,7 +10,7 @@ __all__ = ["rgbprint"]
 
 def rgbprint(
         *values: Any,
-        color: Union[str, int, SUPPORTED_COLORS_LITERAL, Tuple[int, int, int], Color, None] = None,
+        color: Union[str, int, Tuple[int, int, int], Color, None] = None,
         sep:   str = " ",
         end:   str = "\n") -> None:
     """
@@ -28,10 +27,10 @@ def rgbprint(
         color = Color(color)
         sys.stdout.write(str(color))
 
-    text = sep.join(map(str, values))
+    text = str(sep).join(map(str, values))
 
     try:
         sys.stdout.write(text)
     finally:
-        sys.stdout.write(end)
+        sys.stdout.write(str(end))
         sys.stdout.write(Fore.RESET)

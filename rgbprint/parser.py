@@ -1,8 +1,6 @@
+import string
 from typing import Tuple
-from typing import Union
-
-
-from .supported_colors import SupportedColors, SUPPORTED_COLORS_LITERAL
+from .supported_colors import SupportedColors
 
 
 __all__ = ["ColorParser"]
@@ -14,14 +12,19 @@ class ColorParser:
     """
 
     @classmethod
-    def parse(cls, color) -> Union[Tuple[int, int, int], None]:
-        """parses the color"""
+    def parse(cls, color) -> Tuple[int, int, int]:
+        """
+        parses the string, int, or hex colors into color tuples
+
+        raises:
+            ValueError when passed an invalid color
+        """
         from .color import Color
 
-        if isinstance(color, str) and hasattr(SupportedColors, color.upper()):
+        if isinstance(color, str) and next((True for c in SupportedColors if c.name == color.upper()), False):
             color = cls._parse_color_name(color)
 
-        elif isinstance(color, str):
+        elif isinstance(color, str) and not any(c not in string.hexdigits+"#" for c in color):
             color = cls._parse_hex_string(color)
 
         elif isinstance(color, int):
@@ -34,25 +37,19 @@ class ColorParser:
             color = color.r, color.g, color.b
 
         else:
-            return None
-
-        color = cls._clip_color_tuple(color)
+            raise ValueError("{} is not a valid color!".format(color))
 
         return color
 
     @classmethod
-    def _clip_color_tuple(cls, color: Tuple[int, int, int]) -> Tuple:
-        return tuple(max(0, min(x, 255)) for x in list(color))
-
-    @classmethod
-    def _parse_color_name(cls, color: Union[str, SUPPORTED_COLORS_LITERAL]) -> Tuple[int, int, int]:
+    def _parse_color_name(cls, color: str) -> Tuple[int, int, int]:
         """parses named colors"""
         color = getattr(SupportedColors, color.upper())
         color = color.value
         return color
 
     @classmethod
-    def _parse_hex_string(cls, color: str) -> Tuple:
+    def _parse_hex_string(cls, color: str) -> Tuple[int, int, int]:
         if len(color) == 7 and color.startswith("#"):
             color = color.replace("#", "")
 
@@ -68,5 +65,5 @@ class ColorParser:
         return red, green, blue
 
     @classmethod
-    def _color_char(cls, color: Union[str, Tuple, int]) -> str:
-        return f"\033[38;2;{color[0]};{color[1]};{color[2]}m"
+    def _color_char(cls, color: Tuple[int, int, int]) -> str:
+        return "\033[38;2;{0};{1};{2}m".format(*color)
