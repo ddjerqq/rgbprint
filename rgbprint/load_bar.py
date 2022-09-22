@@ -11,11 +11,11 @@ __all__ = ["load_bar"]
 
 
 def load_bar(start_color: Union[str, int, Tuple[int, int, int], Color],
-             end_color:   Union[str, int, Tuple[int, int, int], Color],
+             end_color: Union[str, int, Tuple[int, int, int], Color],
              *,
-             width: int   = 20,
+             width: int = 20,
              delay: float = 0.5,
-             fill:  str   = " ",
+             fill: str = " ",
              delimiter: str = "█",
              ) -> Generator:
     """
@@ -31,19 +31,19 @@ def load_bar(start_color: Union[str, int, Tuple[int, int, int], Color],
     :param delimiter:    the delimiter character.
     """
     start_color = Color(start_color)
-    end_color   = Color(end_color)
+    end_color = Color(end_color)
 
     delimiter = str(delimiter)
-    fill      = str(fill)
+    fill = str(fill)
 
-    grad      = cycle(gradient((start_color.r, start_color.g, start_color.b),
-                               (end_color.r, end_color.g, end_color.b),
-                               width))
+    grad = cycle(gradient((start_color.r, start_color.g, start_color.b),
+                          (end_color.r, end_color.g, end_color.b),
+                          width))
 
     for progress in range(width + 1):
         rgbprint("[", color=Color((255, 255, 255)), sep="", end="")
 
-        content = "{}{}".format(delimiter*progress, fill*(width-progress))
+        content = "{}{}".format(delimiter * progress, fill * (width - progress))
 
         for bar in content:
             rgbprint(bar, color=next(grad), sep="", end="")

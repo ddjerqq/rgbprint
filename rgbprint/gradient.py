@@ -2,10 +2,7 @@ import sys
 import time
 from typing import Tuple, List, Any, Union
 
-
 from .color import Color
-from .parser import ColorParser
-from .fore import Fore
 
 __all__ = ["gradient", "gradient_print", "gradient_change", "gradient_scroll"]
 
@@ -22,9 +19,9 @@ def gradient(start: Tuple[int, int, int], end: Tuple[int, int, int], steps: int)
     gs = [start[1]]
     bs = [start[2]]
     for step in range(1, steps):
-        rs.append(round(start[0] + (end[0]-start[0]) * step/steps))
-        gs.append(round(start[1] + (end[1]-start[1]) * step/steps))
-        bs.append(round(start[2] + (end[2]-start[2]) * step/steps))
+        rs.append(round(start[0] + (end[0] - start[0]) * step / steps))
+        gs.append(round(start[1] + (end[1] - start[1]) * step / steps))
+        bs.append(round(start[2] + (end[2] - start[2]) * step / steps))
 
     return list(zip(rs, gs, bs))
 
@@ -32,7 +29,7 @@ def gradient(start: Tuple[int, int, int], end: Tuple[int, int, int], steps: int)
 def gradient_print(
         *values: Any,
         start_color: Union[str, int, Tuple[int, int, int], Color],
-        end_color:   Union[str, int, Tuple[int, int, int], Color],
+        end_color: Union[str, int, Tuple[int, int, int], Color],
         sep: str = " ",
         end: str = "\n") -> None:
     """
@@ -53,7 +50,7 @@ def gradient_print(
     text = str(sep).join(map(str, values))
 
     start_color = ColorParser.parse(start_color)
-    end_color   = ColorParser.parse(end_color)
+    end_color = ColorParser.parse(end_color)
 
     steps = len(text)
 
@@ -72,7 +69,7 @@ def gradient_print(
 def gradient_change(
         *values: Any,
         start_color: Union[str, int, Tuple[int, int, int], Color],
-        end_color:   Union[str, int, Tuple[int, int, int], Color],
+        end_color: Union[str, int, Tuple[int, int, int], Color],
         delay: float = 0.05,
         sep: str = " ",
         end: str = "\n") -> None:
@@ -95,9 +92,9 @@ def gradient_change(
     text = str(sep).join(map(str, values))
 
     start_color = ColorParser.parse(start_color)
-    end_color   = ColorParser.parse(end_color)
-    steps       = len(text)
-    grad        = gradient(start_color, end_color, steps)
+    end_color = ColorParser.parse(end_color)
+    steps = len(text)
+    grad = gradient(start_color, end_color, steps)
 
     try:
         for idx in range(steps):
@@ -113,7 +110,7 @@ def gradient_change(
 def gradient_scroll(
         *values: Any,
         start_color: Union[str, int, Tuple[int, int, int], Color],
-        end_color:   Union[str, int, Tuple[int, int, int], Color],
+        end_color: Union[str, int, Tuple[int, int, int], Color],
         delay: float = 0.03,
         times: int = 4,
         reverse: bool = False,
@@ -141,12 +138,12 @@ def gradient_scroll(
         text += " "
 
     start_color = ColorParser.parse(start_color)
-    end_color   = ColorParser.parse(end_color)
-    steps       = len(text)
+    end_color = ColorParser.parse(end_color)
+    steps = len(text)
 
-    first_half  = gradient(start_color, end_color, steps // 2)
+    first_half = gradient(start_color, end_color, steps // 2)
     second_half = gradient(end_color, start_color, steps // 2)
-    grad    = first_half + second_half
+    grad = first_half + second_half
 
     try:
         for _ in range(times * steps):
