@@ -1,21 +1,26 @@
 from __future__ import annotations
 
 import random
+import string
 from typing import (
+    List,
     Union,
     Tuple,
     Optional,
     Iterable,
     overload,
+    TYPE_CHECKING,
 )
 
-__all__ = ["Color"]
+if TYPE_CHECKING:
+    from . import ColorType
 
 
 class __InterceptGetattr(type):
     """
     this is a metaclass which will intercept the Class getattr() and convert color tuples into Color objects.
     """
+
     def __getattribute__(cls, key: str) -> object:
         """
         if we are accessing colors, we want to return color objects, not tuples,
@@ -27,34 +32,38 @@ class __InterceptGetattr(type):
             return Color(random.randint(0, 16777215))
 
         attr = object.__getattribute__(cls, key)
-        if isinstance(attr, tuple) and len(attr) == 3 and all(isinstance(c, int) for c in attr):
+        if (
+            isinstance(attr, tuple)
+            and len(attr) == 3
+            and all(isinstance(c, int) for c in attr)
+        ):
             return Color(attr)
         else:
             return attr
 
 
-# we need this here to allow for getting of the colors.
 class Color(metaclass=__InterceptGetattr):
     """
-    Color
+    Color class, to represent a 8bit ANSI color
+
+    instances of this class are printable, meaning when you print it, it changes the color on the terminal.
 
     all the ways below are valid to initialize a color:
 
-    - Color(0xff00ff)
+    >>> Color(0xff00ff)
+    >>> Color("#ff00ff")
+    >>> Color("ff00ff")
+    >>> Color([255, 0, 255])
+    >>> Color(255, 0, 255)
+    >>> Color(255, 0, 0xFF)
+    >>> Color.red
+    >>> Color.random
 
-    - Color("#ff00ff")
-
-    - Color("ff00ff")
-
-    - Color([255, 0, 255])
-
-    - Color(255, 0, 255)
-
-    - Color(255, 0, 0xFF)
-
-    - Color.red
-
-    - Color.random
+    you can also destructure colors like so:
+    >>> r, g, b = Color.red
+    >>> assert r == 255
+    >>> assert g == 0
+    >>> assert b == 0
     """
 
     # region: colors
@@ -237,7 +246,7 @@ class Color(metaclass=__InterceptGetattr):
 
         Examples:
             >>> good = Color("4BBEE3")
-            >>> bad  = Color("red")
+            >>> not_good_but_ok = Color("red")
 
         Raises:
              ValueError: if the color passed is in a wrong format. for example out of range of 0-255, or the HEX is invalid for example: has more than 6 (RRGGBB) digits.
@@ -256,16 +265,35 @@ class Color(metaclass=__InterceptGetattr):
 
         Examples:
             >>> good = Color(0xFF00FF)
+            >>> not_good = Color(0xF4F)
             >>> bad0 = Color(-10)
-            >>> bad1 = Color(0xF4F)
-            >>> bad2 = Color(0xFF00AABB)
+            >>> bad1 = Color(0xFF00AABB)
 
         Raises:
              ValueError: if the color passed is in a wrong format. for example out of range of 0x000000-0xFFFFFF
         """
 
     @overload
-    def __init__(self, color: Iterable[int, int, int]) -> None:
+    def __init__(self, color: Color) -> None:
+        """
+        Copy a color from another.
+
+        Args:
+            color: the color object
+
+        Returns:
+            None
+
+        Examples:
+            >>> red0 = Color(255, 0, 0)
+            >>> red1 = Color(red0)
+
+        Raises:
+             ValueError: if the color passed is in a wrong format. for example out of range of 0x000000-0xFFFFFF
+        """
+
+    @overload
+    def __init__(self, color: Union[Tuple[int, int, int], List[int, int, int]]) -> None:
         """
         Make a color from an iterable of integers.
 
@@ -283,13 +311,14 @@ class Color(metaclass=__InterceptGetattr):
         Raises:
              ValueError: if the color passed is in a wrong format. for example out of range of 0x000000-0xFFFFFF
         """
+
     # endregion
 
     def __init__(
-            self,
-            r: Union[int, str, Iterable[int, int, int]],
-            g: Optional[int] = None,
-            b: Optional[int] = None,
+        self,
+        r: ColorType,
+        g: Optional[int] = None,
+        b: Optional[int] = None,
     ) -> None:
         if isinstance(r, str):
             # Color("#FF00FF") Color("FF00FF")
@@ -304,11 +333,16 @@ class Color(metaclass=__InterceptGetattr):
             # Color(255, 0, 255)
             if isinstance(g, int) and isinstance(b, int):
                 if not all(c in range(0x100) for c in (r, g, b)):
-                    raise ValueError("color is of unsupported type: {}".format((r, g, b)))
+                    raise ValueError(
+                        "color is of unsupported type: {}".format((r, g, b))
+                    )
 
             # Color(0xFF00FF)
             else:
                 r, g, b = Color.__from_int(r)
+
+        elif isinstance(r, Color):
+            r, g, b = r
 
         else:
             raise TypeError("color is of unsupported type: {}".format((r, g, b)))
@@ -323,18 +357,23 @@ class Color(metaclass=__InterceptGetattr):
         if __color.startswith("#"):
             __color = __color[1:]
 
-        try:
-            rgb = tuple(bytes.fromhex(__color))
-        except ValueError:
-            raise ValueError("{} is not a valid hex string".format(__color))
+        # try to get the color name
+        # maybe it's not malformed, but a color name
+        if not all(c in string.hexdigits for c in __color):
+            color = getattr(Color, __color, None)
+            if color is not None and isinstance(color, Color):
+                return tuple(color)
+            else:
+                raise ValueError("{} is not a valid color string".format(__color))
 
-        #                        0xFF + 1
-        if any(cell not in range(0x100) for cell in rgb):
-            raise ValueError("one or more parts in {} are out of range of 0-255".format(__color))
+        # Safety: this will never raise ValueError because we verify the HEX on line 360.
+        rgb = tuple(bytes.fromhex(__color))
 
         if len(rgb) != 3:
             raise ValueError(
-                "{} is not a valid color. it must be a hex string in format of RRGGBB or #RRGGBB".format(__color)
+                "{} is not a valid color. it must be a hex string in format of RRGGBB or #RRGGBB".format(
+                    __color
+                )
             )
 
         return rgb
@@ -343,10 +382,14 @@ class Color(metaclass=__InterceptGetattr):
     def __from_int(__color: int) -> Tuple[int, int, int]:
         b = __color % 256
         g = ((__color - b) // 256) % 256
-        r = ((__color - b) // 256 ** 2) - g // 256
+        r = ((__color - b) // 256**2) - g // 256
 
         if not all(c in range(0x100) for c in (r, g, b)):
-            raise ValueError("color is not proper format. each triplet must be in range 0-255. not {}".format(__color))
+            raise ValueError(
+                "color is not proper format. each triplet must be in range 0-255. not {}".format(
+                    __color
+                )
+            )
 
         return r, g, b
 
@@ -355,21 +398,33 @@ class Color(metaclass=__InterceptGetattr):
         try:
             r, g, b = list(__color)
         except ValueError as exc:
-            raise ValueError("color is in an unsupported format: {}".format(__color)) from exc
+            raise ValueError(
+                "color is in an unsupported format: {}".format(__color)
+            ) from exc
         else:
             if not all(c in range(0x100) for c in (r, g, b)):
-                raise ValueError("color is in an unsupported format: {}".format(__color))
+                raise ValueError(
+                    "color is in an unsupported format: {}".format(__color)
+                )
             return r, g, b
+
     # endregion
+
+    def __iter__(self):
+        yield self.r
+        yield self.g
+        yield self.b
 
     def __str__(self) -> str:
         return "\033[38;2;{0.r};{0.g};{0.b}m".format(self)
 
-    def __eq__(self, other: Color) -> bool:
-        return isinstance(other, Color) and \
-               self.r == other.r and \
-               self.g == other.g and \
-               self.b == other.b
-
     def __repr__(self) -> str:
         return "Color({0.r}, {0.g}, {0.b})".format(self)
+
+    def __eq__(self, other: Color) -> bool:
+        return (
+            isinstance(other, Color)
+            and self.r == other.r
+            and self.g == other.g
+            and self.b == other.b
+        )

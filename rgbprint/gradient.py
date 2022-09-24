@@ -1,56 +1,80 @@
+from __future__ import annotations
+
+import asyncio
 import sys
 import time
-from typing import Tuple, List, Any, Union
+from typing import Tuple, List, Any, TYPE_CHECKING
 
 from .color import Color
 
-__all__ = ["gradient", "gradient_print", "gradient_change", "gradient_scroll"]
+if TYPE_CHECKING:
+    from . import ColorType
 
 
-def gradient(start: Tuple[int, int, int], end: Tuple[int, int, int], steps: int) -> List[Tuple[int, int, int]]:
+def gradient(
+    start: Tuple[int, int, int], end: Tuple[int, int, int], steps: int
+) -> List[Tuple[int, int, int]]:
     """
-    generate gradients with start color, end color and amount of steps.
-    -------------------------------------------------------------------
-    :param start: start color, this must be a tuple of 3 ints.
-    :param end: end color, this must be a tuple of 3 ints.
-    :param steps: amount of steps.
+    Generate a gradient, from the start color to the end color with `steps` amount.
+
+    Args:
+        start (tuple[int, int, int]): start color, this must be a tuple of 3 ints.
+        end (tuple[int, int, int]): end color, this must be a tuple of 3 ints.
+        steps (int): amount of steps.
+
+    Returns:
+        list[tuple[int, int, int]]: `steps` amount of colors in between the `start_color` and the `end_color`
     """
-    rs = [start[0]]
-    gs = [start[1]]
-    bs = [start[2]]
+    rs: List[int] = [start[0]]
+    gs: List[int] = [start[1]]
+    bs: List[int] = [start[2]]
+
     for step in range(1, steps):
         rs.append(round(start[0] + (end[0] - start[0]) * step / steps))
         gs.append(round(start[1] + (end[1] - start[1]) * step / steps))
         bs.append(round(start[2] + (end[2] - start[2]) * step / steps))
 
-    return list(zip(rs, gs, bs))
+    return list(
+        zip(
+            rs,  # [255, 127,   0]
+            gs,  # [0,   127, 255]
+            bs,  # [0,     0,   0]
+        )
+    )
 
 
 def gradient_print(
-        *values: Any,
-        start_color: Union[str, int, Tuple[int, int, int], Color],
-        end_color: Union[str, int, Tuple[int, int, int], Color],
-        sep: str = " ",
-        end: str = "\n") -> None:
+    *values: Any,
+    start_color: ColorType,
+    end_color: ColorType,
+    sep: str = " ",
+    end: str = "\n",
+) -> None:
     """
-    print gradients.
-    ----------------
-    note:
-        you must pass both `start_color` and `end_color`.
-    raises:
-        ValueError: if start_color and end_color are invalid, or unsupported format.
+    print gradients on your terminal
 
-    :param values: any value, will be auto-cast to str.
-    :param start_color: start color, this can be in any supported format.
-    :param end_color: end color, this can be in any supported format.
-    :param sep: separator, gets auto-cast to str.
-    :param end: end char, gets auto-cast to str.
+    Args:
+        *values (Any): *values to print.
+        start_color (ColorType): start_color. see examples down below for supported formats.
+        end_color (ColorType): end_color. see examples down below for supported formats.
+        sep (:obj:`str`, optional): optional, string inserted between values, default a space.
+        end (:obj:`str`, optional): optional, string appended after the last value, default a newline.
+
+    Examples:
+        >>> from rgbprint import gradient_print, Color
+        >>> username = "john doe"
+        >>> gradient_print("hello", start_color="red", end_color="yellow")
+        >>> gradient_print("hello", username, "welcome to the app", start_color=Color.forest_green, end_color=0xFF00FF)
+        >>> gradient_print("[+] loading data, please wait...", start_color=Color.aqua_marine, end_color=Color.peach_puff)
+
+    Raises:
+        ValueError: if the color is in an unsupported format, or is out of range of 0-16777215 (0x000000-0xFFFFFF).
+        TypeError: if the color is of unsupported type, or the function is missing arguments.
     """
-
     text = str(sep).join(map(str, values))
 
-    start_color = ColorParser.parse(start_color)
-    end_color = ColorParser.parse(end_color)
+    start_color = tuple(Color(start_color))
+    end_color = tuple(Color(end_color))
 
     steps = len(text)
 
@@ -62,83 +86,111 @@ def gradient_print(
             sys.stdout.write(str(Color(color)) + char)
         sys.stdout.write(str(end))
     finally:
-        sys.stdout.write(Fore.RESET)
+        sys.stdout.write(Color.reset)
         sys.stdout.flush()
 
 
 def gradient_change(
-        *values: Any,
-        start_color: Union[str, int, Tuple[int, int, int], Color],
-        end_color: Union[str, int, Tuple[int, int, int], Color],
-        delay: float = 0.05,
-        sep: str = " ",
-        end: str = "\n") -> None:
+    *values: Any,
+    start_color: ColorType,
+    end_color: ColorType,
+    delay: float = 0.03,
+    times: int = 1,
+    reverse: bool = False,
+    sep: str = " ",
+    end: str = "\n",
+) -> None:
     """
-    print gradients and change in place from start_color to end_color in same place. \n
-    note:
-        both start_color and end_color must be passed.
-        THIS DOES NOT WORK WITH MULTILINE TEXTS `YET`. \n
-    raises:
-        ValueError: if start_color and end_color are invalid, or unsupported format.
-    --------------------------------------------------------------------------------
-    :param values: any value, will be auto-cast to str.
-    :param start_color: start color, this can be in any supported format.
-    :param end_color: end color, this can be in any supported format.
-    :param delay: delay between each change, recommended to be between 0.005 and 0.1.
-    :param sep: separator, gets auto-cast to str.
-    :param end: end char, gets auto-cast to str.
+    change gradients in place on your terminal
+
+    Args:
+        *values (Any): *values to print.
+        start_color (ColorType): start_color. see examples down below for supported formats.
+        end_color (ColorType): end_color. see examples down below for supported formats.
+        delay (float, optional): optional, the delay between the change of the gradient, recommended range: .05 - .1
+        times (int, optional): optional, the amount of times to change the gradient in place.
+        reverse (bool, optional): whether to start with the end color or not.
+        sep (:obj:`str`, optional): optional, string inserted between values, default a space.
+        end (:obj:`str`, optional): optional, string appended after the last value, default a newline.
+
+    Examples:
+        >>> from rgbprint import gradient_change, Color
+        >>> username = "john doe"
+        >>> gradient_change("hello", start_color="red", end_color="yellow")
+        >>> gradient_change("hello", username, "welcome to the app", start_color=Color.forest_green, end_color=0xFF00FF)
+        >>> gradient_change("[+] loading data, please wait...", start_color="red", end_color="blue", times=10, delay=.1)
+
+    Raises:
+        ValueError: if the color is in an unsupported format, or is out of range of 0-16777215 (0x000000-0xFFFFFF).
+        TypeError: if the color is of unsupported type, or the function is missing arguments.
     """
 
     text = str(sep).join(map(str, values))
 
-    start_color = ColorParser.parse(start_color)
-    end_color = ColorParser.parse(end_color)
+    start_color = tuple(Color(start_color))
+    end_color = tuple(Color(end_color))
     steps = len(text)
     grad = gradient(start_color, end_color, steps)
 
+    if reverse:
+        grad.reverse()
+
     try:
-        for idx in range(steps):
-            sys.stdout.write(str(Color(grad[idx])) + "\r" + text)
+        for _ in range(times):
+            for idx in range(steps):
+                sys.stdout.write(str(Color(grad[idx])) + "\r" + text)
+                sys.stdout.flush()
+                time.sleep(delay)
             sys.stdout.flush()
-            time.sleep(delay)
-        sys.stdout.write(end)
     finally:
-        sys.stdout.write(Fore.RESET)
+        sys.stdout.write(end)
+        sys.stdout.write(Color.reset)
         sys.stdout.flush()
 
 
 def gradient_scroll(
-        *values: Any,
-        start_color: Union[str, int, Tuple[int, int, int], Color],
-        end_color: Union[str, int, Tuple[int, int, int], Color],
-        delay: float = 0.03,
-        times: int = 4,
-        reverse: bool = False,
-        sep: str = " ",
-        end: str = "\n") -> None:
+    *values: Any,
+    start_color: ColorType,
+    end_color: ColorType,
+    delay: float = 0.03,
+    times: int = 4,
+    reverse: bool = False,
+    sep: str = " ",
+    end: str = "\n",
+) -> None:
+    r"""
+    scroll gradients on your terminal
+
+    Args:
+        *values (Any): *values to print.
+        start_color (ColorType): start_color. see examples down below for supported formats.
+        end_color (ColorType): end_color. see examples down below for supported formats.
+        delay (float, optional): optional, the delay between the change of the gradient, recommended range: .05 - .1
+        times (int, optional): optional, the amount of times to change the gradient in place.
+        reverse (bool, optional): whether to start with the end color or not.
+        sep (:obj:`str`, optional): optional, string inserted between values, default a space.
+        end (:obj:`str`, optional): optional, string appended after the last value, default a newline.
+
+    Examples:
+        >>> from rgbprint import gradient_scroll, Color
+        >>> username = "john doe"
+        >>> gradient_scroll("hello", start_color="red", end_color="yellow")
+        >>> gradient_scroll("hello", username, "welcome to the app", start_color=Color.forest_green, end_color=0xFF00FF)
+
+        >>> gradient_scroll("[+] loading data, please wait...", start_color="red", end_color="yellow", times=5, delay=.1, end="\r")
+        >>> gradient_scroll("[+] loading data, please wait...", start_color="red", end_color="yellow", times=5, delay=.1, reverse=True)
+
+    Raises:
+        ValueError: if the color is in an unsupported format, or is out of range of 0-16777215 (0x000000-0xFFFFFF).
+        TypeError: if the color is of unsupported type, or the function is missing arguments.
     """
-    scroll gradient text horizontally \n
-    note:
-        both start_color and end_color must be passed. \n
-        THIS DOES NOT WORK WITH MULTILINE TEXTS `YET`.  \n
-    raises:
-        ValueError: if start_color and end_color are invalid, or unsupported format.
-    --------------------
-    :param values: any value, will be auto-cast to str.
-    :param start_color: start color, this can be in any supported format.
-    :param end_color: end color, this can be in any supported format.
-    :param delay: delay between each change, recommended to be lower than 0.1
-    :param times: number of times to scroll
-    :param reverse: reverse the gradient
-    :param sep: separator, gets auto-cast to str
-    :param end: end char, gets auto-cast to str
-    """
+
     text = str(sep).join(map(str, values))
     if len(text) % 2:
         text += " "
 
-    start_color = ColorParser.parse(start_color)
-    end_color = ColorParser.parse(end_color)
+    start_color = tuple(Color(start_color))
+    end_color = tuple(Color(end_color))
     steps = len(text)
 
     first_half = gradient(start_color, end_color, steps // 2)
@@ -157,5 +209,5 @@ def gradient_scroll(
 
         sys.stdout.write(end)
     finally:
-        sys.stdout.write(Fore.RESET)
+        sys.stdout.write(Color.reset)
         sys.stdout.flush()
