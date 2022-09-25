@@ -1,4 +1,4 @@
-# RGBPRINT 4.0.1
+# RGBPRINT 4.0.2
 ![rgbprint-in-rainbow-gradient-color](https://qu.ax/taDN.png)
 ![rgbprint-blue-purple](https://qu.ax/JLnS.gif)
 ![rgbprint-blue-purple](https://qu.ax/pKpa.gif)
