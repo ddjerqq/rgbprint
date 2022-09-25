@@ -16,6 +16,58 @@ if TYPE_CHECKING:
     from . import ColorType
 
 
+def from_str(__color: str) -> Tuple[int, int, int]:
+    if __color.startswith("#"):
+        __color = __color[1:]
+    # try to get the color name
+    # maybe it's not malformed, but a color name
+    if not all(c in string.hexdigits for c in __color):
+        color = getattr(Color, __color, None)
+        if color is not None and isinstance(color, Color):
+            return tuple(color)
+        else:
+            raise ValueError("{} is not a valid color string".format(__color))
+    # Safety: this will never raise ValueError because we verify the HEX on line 360.
+    rgb = tuple(bytes.fromhex(__color))
+    if len(rgb) != 3:
+        raise ValueError(
+            "{} is not a valid color. it must be a hex string in format of RRGGBB or #RRGGBB".format(
+                __color
+            )
+        )
+    return rgb
+
+
+def from_int(__color: int) -> Tuple[int, int, int]:
+    b = __color % 256
+    g = ((__color - b) // 256) % 256
+    r = ((__color - b) // 256 ** 2) - g // 256
+
+    if not all(c in range(0x100) for c in (r, g, b)):
+        raise ValueError(
+            "color is not proper format. each triplet must be in range 0-255. not {}".format(
+                __color
+            )
+        )
+
+    return r, g, b
+
+
+def from_iterable(__color: Iterable[int, int, int]) -> Tuple[int, int, int]:
+    try:
+        r, g, b = list(__color)
+    except ValueError as exc:
+        raise ValueError(
+            "color is in an unsupported format: {}".format(__color)
+        ) from exc
+    else:
+        if not all(c in range(0x100) for c in (r, g, b)):
+            raise ValueError(
+                "color is in an unsupported format: {}".format(__color)
+            )
+        return r, g, b
+
+
 class __InterceptGetattr(type):
     """
     this is a metaclass which will intercept the Class getattr() and convert color tuples into Color objects.
@@ -322,11 +374,11 @@ class Color(metaclass=__InterceptGetattr):
     ) -> None:
         if isinstance(r, str):
             # Color("#FF00FF") Color("FF00FF")
-            r, g, b = Color.__from_str(r)
+            r, g, b = from_str(r)
 
         elif isinstance(r, Iterable):
             # Color((255, 0, 255))
-            r, g, b = Color.__from_iterable(r)
+            r, g, b = from_iterable(r)
 
         elif isinstance(r, int):
 
@@ -339,7 +391,7 @@ class Color(metaclass=__InterceptGetattr):
 
             # Color(0xFF00FF)
             else:
-                r, g, b = Color.__from_int(r)
+                r, g, b = from_int(r)
 
         elif isinstance(r, Color):
             r, g, b = r
@@ -350,65 +402,6 @@ class Color(metaclass=__InterceptGetattr):
         self.r = r
         self.g = g
         self.b = b
-
-    # region create colors
-    @staticmethod
-    def __from_str(__color: str) -> Tuple[int, int, int]:
-        if __color.startswith("#"):
-            __color = __color[1:]
-
-        # try to get the color name
-        # maybe it's not malformed, but a color name
-        if not all(c in string.hexdigits for c in __color):
-            color = getattr(Color, __color, None)
-            if color is not None and isinstance(color, Color):
-                return tuple(color)
-            else:
-                raise ValueError("{} is not a valid color string".format(__color))
-
-        # Safety: this will never raise ValueError because we verify the HEX on line 360.
-        rgb = tuple(bytes.fromhex(__color))
-
-        if len(rgb) != 3:
-            raise ValueError(
-                "{} is not a valid color. it must be a hex string in format of RRGGBB or #RRGGBB".format(
-                    __color
-                )
-            )
-
-        return rgb
-
-    @staticmethod
-    def __from_int(__color: int) -> Tuple[int, int, int]:
-        b = __color % 256
-        g = ((__color - b) // 256) % 256
-        r = ((__color - b) // 256**2) - g // 256
-
-        if not all(c in range(0x100) for c in (r, g, b)):
-            raise ValueError(
-                "color is not proper format. each triplet must be in range 0-255. not {}".format(
-                    __color
-                )
-            )
-
-        return r, g, b
-
-    @staticmethod
-    def __from_iterable(__color: Iterable[int, int, int]) -> Tuple[int, int, int]:
-        try:
-            r, g, b = list(__color)
-        except ValueError as exc:
-            raise ValueError(
-                "color is in an unsupported format: {}".format(__color)
-            ) from exc
-        else:
-            if not all(c in range(0x100) for c in (r, g, b)):
-                raise ValueError(
-                    "color is in an unsupported format: {}".format(__color)
-                )
-            return r, g, b
-
-    # endregion
 
     def __iter__(self):
         yield self.r

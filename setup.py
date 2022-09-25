@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="rgbprint",
-    version="4.0.1",
+    version="4.0.2",
     license="GNU",
     author="ddjerqq",
     author_email="ddjerqq@gmail.com",
