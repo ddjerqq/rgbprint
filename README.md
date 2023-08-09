@@ -224,7 +224,7 @@
 > basic gradient print
 > ```python
 > user = "john smith"
-> gradient_scroll("welcome", user, "you are", 25, "years old", start_color="red, end_color="yellow")
+> gradient_scroll("welcome", user, "you are", 25, "years old", start_color="red", end_color="yellow")
 > ```
 > more examples
 > ```python
