@@ -402,6 +402,6 @@
 > the color class has some dunder magic methods implemented.
 > 
 > - `__iter__` to destruct the colors.
-> - `__str__` to print the colors
+> - `__str__` to print the colors.
 > - `__repr__` to represent colors for debugging purposes.
 > - `__eq__` to compare 2 colors, and see if they are the same color.
